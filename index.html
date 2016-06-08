@@ -4,11 +4,23 @@
     <title>Yolk PHP</title>
   </head>
   <body>
-    <h1>[{title}]</h1>
+    <h1>[{title.name}]</h1>
+    <h3>[{title.sub}]</h3>
     <p>[{Something}]</p>
-    <div loop="listOfStuff>stuff">
-      {{<p>[{stuff}]</p>}}
-      {{<h1>[{stuff}]</h1>}}
+
+    [loop {listOfStuff>stuff}]
+    <div>
+      {{<p>[[stuff.name]]</p>}}
+
+      [loop {listOfStuff>stuff}]
+      <div>
+        {{<h1 style="margin-left:100px">[[stuff.name]]</h1>}}
+      </div>
+      [/loop]
+
     </div>
+    [/loop]
+
+
   </body>
 </html>

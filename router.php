@@ -3,9 +3,14 @@
   include('dev/yolk.php');
   $html = file_get_contents('index.html');
   $inputs_to_view = array(
-    "title" => "Hello World!",
+    "title" => array("name" => "Hello World!","sub" => "Aliens!"),
     "Something" => "Additional text here",
-    "listOfStuff" => array("apple","pear","orange")
+    "listOfStuff" => array(
+      array("name" => "apple"),
+      array("name" => "pear"),
+      array("name" => "orange")
+    ),
+    "stuff" => array("red","blue","green")
   );
   $yolk = new Yolk;
   $yolk->template($html);
