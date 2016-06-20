@@ -8,19 +8,17 @@
     <h3>[{title.sub}]</h3>
     <p>[{Something}]</p>
 
-    [loop {listOfStuff>stuff}]
-    <div>
-      {{<p>[[stuff.name]]</p>}}
-
-      [loop {listOfStuff>stuff}]
-      <div>
-        {{<h1 style="margin-left:100px">[[stuff.name]]</h1>}}
-      </div>
-      [/loop]
-
-    </div>
+    <hr>
+    [loop {listOfStuff => stuff}]
+      <h2>Name: {{stuff.name}}</h2>
+      <h4>Sex: {{stuff.sex}}</h4>
+      <p>Age: {{stuff.age}} years</p>
+      <hr>
     [/loop]
 
+    [if {year == current_year}]
+      <h2>The current year is [{year}]</h2>
+    [/if]
 
   </body>
 </html>

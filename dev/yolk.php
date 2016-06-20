@@ -7,17 +7,10 @@
 
   @TODO Check if parent has loop
 
-  Change loop with this regex /(?s)\[loop.*?\[\/loop]/
+   ? - Make standard variables not affect nested variables inside loops
 
-  to have this syntax
-  [loop {listOfStuff>stuff}]
-  <div>
-    {{<p>[[stuff.name]]</p>}}
-    <div loop="stuff>deep">
-      {{<h1 style="margin-left:100px">[{Something}] - [[deep]]</h1>}}
-    </div>
-  </div>
-  [/loop]
+   - Nested loops
+   - if conditionals
 
 */
 
@@ -64,6 +57,8 @@ class Yolk{
 
     // Run Yolk foreach method
     $this->_process_loops($inputs);
+
+    $this->_process_conditionals($inputs);
   }
 
   private function _has_key_pointer($string){
@@ -86,8 +81,8 @@ class Yolk{
   */
   private function _process_loops($inputs){
 
-    $regex_loop_container = '/(?s)\[loop.*?\[\/loop]/';
-    preg_match_all($regex_loop_container, $this->_template, $loop_container);
+    $regex_loop = '/(?s)\[loop {(.*)}\](.*)\[\/loop]/';
+    preg_match_all($regex_loop, $this->_template, $loop_container);
 
     //Storage variables which are used for str_replace
     $element_original_html = '';
@@ -95,14 +90,12 @@ class Yolk{
 
     for($loop_index = 0; $loop_index < count($loop_container[0]); $loop_index++){
 
-      $regex_loop_param = '/(?s)\[loop {(.*?)}]/';
-      preg_match_all($regex_loop_param, $loop_container[0][$loop_index], $loop_param);
-
-      $param = $loop_param[1][0];
+      $param = $loop_container[1][$loop_index];
+      $body = $loop_container[2][$loop_index];
 
       if($param != null){
         $element_original_html = $loop_container[0][$loop_index];
-        $element_new_html = $this->_loop($inputs, $loop_container[0][$loop_index], $param);
+        $element_new_html = $this->_loop($inputs, $body, $param);
       }
       $this->_template = str_replace($element_original_html, $element_new_html, $this->_template);
     }
@@ -113,27 +106,17 @@ class Yolk{
   */
   private function _loop($inputs, $loop_contents, $condition){
 
-    $param = explode('>', $condition);
+    $param = explode('=>', $condition);
     $array = $inputs[trim($param[0])];
 
     $element_new_html = '';
 
     if (count($array) > 0){
       foreach($array as $item){
-        $new_html = '';
-
-        //Find all containers for iteration
-        $regex_containers = '/\{{(.*?)}\}/';
-        preg_match_all($regex_containers, $loop_contents, $containers);
-        //Loop through all containers and append it to the new_html var
-        for ($object=0; $object < count($containers[1]); $object++) {
-          $new_html .= $containers[1][$object];
-        }
-
+        $new_html = $loop_contents;
         //Find all variables to replace with input's item values
-        $regex_variables = '/\[\[(.*?)]\]/';
-        preg_match_all($regex_variables, $new_html, $variables);
-
+        $regex_variables = '/\{{(.*?)}\}/';
+        preg_match_all($regex_variables, $loop_contents, $variables);
         for ($variable=0; $variable < count($variables[1]); $variable++) {
           if (gettype($item) == 'array' && $this->_has_key_pointer($variables[1][$variable]) == true){
             $split_object = explode('.',$variables[1][$variable]);
@@ -143,18 +126,23 @@ class Yolk{
             $new_html = str_replace($variables[0][$variable],$value,$new_html);
           }else{
             if ($param[1] == $variables[1][$variable]){
-              $new_html = str_replace($variables[0][$variable],$item,$new_html);
+              $new_html = str_replace($variables[0][$variable],$item,$loop_contents);
             }
           }
-
-
         }
-
         $element_new_html .= $new_html;
       }
     }
 
     return $element_new_html;
+  }
+
+  public function _process_conditionals($inputs){
+
+  }
+
+  public function _conditionals(){
+
   }
 
   // Load up the template for viewing.
